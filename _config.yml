@@ -1,0 +1,9 @@
+title: Tilt
+description: Smart tilt for your window blinds.
+baseurl: /tilt-site
+issues: https://github.com/DrakeAnglin/tilt-site/issues
+markdown: kramdown
+defaults:
+  - scope: { path: "" }
+    values: { layout: default }
+exclude: [README.md]
