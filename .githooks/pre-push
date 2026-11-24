@@ -1,0 +1,17 @@
+#!/bin/sh
+# Nothing is pushed straight to main: it goes in through a pull request. See docs/agents/workflow.md.
+# The owner's out: tools/agent/allow_main.sh opens main for a short time.
+FILE="$(git rev-parse --git-common-dir)/factory-allow-main"
+UNTIL=$(cat "$FILE" 2>/dev/null || echo 0)
+case "$UNTIL" in ''|*[!0-9]*) UNTIL=0 ;; esac
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = refs/heads/main ]; then
+    if [ "$(date +%s)" -lt "$UNTIL" ]; then
+      echo "pre-push: main is open (the owner allowed it); pushing." >&2
+    else
+      echo "pre-push: main only changes through a pull request. Push a branch and open one." >&2
+      exit 1
+    fi
+  fi
+done
+exit 0

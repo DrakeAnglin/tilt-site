@@ -1,0 +1,6 @@
+_site/
+.jekyll-cache/
+.DS_Store
+# Claude Code scratch
+.claude/worktrees/
+.claude/settings.local.json
