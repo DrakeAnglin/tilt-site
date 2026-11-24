@@ -1,0 +1,49 @@
+name: CI
+
+# Builds the site the way GitHub Pages does, and runs the agent guard tests. Same as tools/agent/check.sh.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/jekyll-build-pages@v1
+      - name: Every page is there, and nothing private is published
+        run: |
+          for PAGE in index.html privacy/index.html support/index.html; do
+            test -s "_site/$PAGE" || { echo "missing: $PAGE"; exit 1; }
+          done
+          for KEEP_OUT in tools docs CLAUDE.md README.md; do
+            test ! -e "_site/$KEEP_OUT" || { echo "published by mistake: $KEEP_OUT"; exit 1; }
+          done
+
+  tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest tools/agent/test_agent.py
+
+  # One check to look at: green only when every job passed.
+  ci:
+    if: always()
+    needs: [site, tools]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "$RESULTS"
+          for R in $RESULTS; do
+            case "$R" in success|skipped) ;; *) exit 1 ;; esac
+          done
