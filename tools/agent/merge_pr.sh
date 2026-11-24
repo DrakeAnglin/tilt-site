@@ -99,7 +99,7 @@ if [ -n "$NO" ]; then
     # The label never stands alone: say why, once per commit.
     # Leave out "has the label": whoever set it has said why already.
     WHY=$(printf '%s\n' "$NO" | grep '^- ' | grep -v 'has the needs-human label' || true)
-    if [ -n "$WHY" ] && [ "$(get "[.comments[].body | select(contains(\"factory-human sha=$SHA\"))] | length")" = 0 ]; then
+    if [ -n "$WHY" ] && [ "$(get "[.comments[] | select(.author.login == \"$ME\") | .body | select(contains(\"factory-human sha=$SHA\"))] | length")" = 0 ]; then
       FIRST=$(printf '%s\n' "$WHY" | sed -n '1s/^- //p' | sed "s/ Confirm:.*//")
       COUNT=$(printf '%s\n' "$WHY" | grep -c '^- ')
       [ "$COUNT" -le 1 ] || FIRST="$FIRST ($((COUNT - 1)) more below.)"

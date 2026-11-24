@@ -24,7 +24,7 @@ jobs:
           for PAGE in index.html privacy/index.html support/index.html; do
             test -s "_site/$PAGE" || { echo "missing: $PAGE"; exit 1; }
           done
-          for KEEP_OUT in tools docs CLAUDE.md README.md; do
+          for KEEP_OUT in tools docs CLAUDE.md CLAUDE.html README.md README.html; do
             test ! -e "_site/$KEEP_OUT" || { echo "published by mistake: $KEEP_OUT"; exit 1; }
           done
 
